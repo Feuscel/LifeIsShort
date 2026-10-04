@@ -36,11 +36,11 @@ class ScrollBlockerService : AccessibilityService() {
             else -> return
         }
 
-        if (!ScrollBlockerSettings.isAppEnabled(
-                this,
-                ScrollBlockerSettings.TargetApp.INSTAGRAM
-            )
-        ) {
+        val configuration = ScrollBlockerSettings.blockingConfiguration(
+            this,
+            ScrollBlockerSettings.TargetApp.INSTAGRAM
+        )
+        if (!configuration.enabled) {
             resetRedirectState()
             return
         }
@@ -65,7 +65,7 @@ class ScrollBlockerService : AccessibilityService() {
             // The navigation-tab option is distinct from individual Reel viewers.
             if (state.reelsTabSelected) {
                 viewerBackPending = false
-                if (!isSourceBlocked(ScrollBlockerSettings.Source.REELS_TAB)) {
+                if (!configuration.blocksSource(ScrollBlockerSettings.Source.REELS_TAB)) {
                     reelsTabRedirectPending = false
                     return
                 }
@@ -93,7 +93,7 @@ class ScrollBlockerService : AccessibilityService() {
                         it != ScreenContext.UNKNOWN
                     } ?: lastStableContext
                 }
-                if (!isOriginBlocked(origin)) return
+                if (!configuration.blocksViewer(origin)) return
 
                 // For individual Reels, one Back action preserves the source screen (feed or
                 // discussion) instead of forcing every user to Instagram Home.
@@ -125,31 +125,6 @@ class ScrollBlockerService : AccessibilityService() {
         } finally {
             root.recycle()
         }
-    }
-
-    private fun isSourceBlocked(source: ScrollBlockerSettings.Source): Boolean =
-        ScrollBlockerSettings.isAppEnabled(this, ScrollBlockerSettings.TargetApp.INSTAGRAM) &&
-            (ScrollBlockerSettings.areAllSourcesBlocked(
-                this,
-                ScrollBlockerSettings.TargetApp.INSTAGRAM
-            ) || ScrollBlockerSettings.isSourceBlocked(
-                this,
-                ScrollBlockerSettings.TargetApp.INSTAGRAM,
-                source
-            ))
-
-    private fun isOriginBlocked(origin: ScreenContext): Boolean {
-        val app = ScrollBlockerSettings.TargetApp.INSTAGRAM
-        if (!ScrollBlockerSettings.isAppEnabled(this, app)) return false
-        if (ScrollBlockerSettings.areAllSourcesBlocked(this, app)) return true
-        val source = when (origin) {
-            ScreenContext.HOME_FEED -> ScrollBlockerSettings.Source.HOME_FEED
-            ScreenContext.REELS_TAB -> ScrollBlockerSettings.Source.REELS_TAB
-            ScreenContext.DIRECT_MESSAGES -> ScrollBlockerSettings.Source.DIRECT_MESSAGES
-            ScreenContext.OTHER,
-            ScreenContext.UNKNOWN -> return false
-        }
-        return ScrollBlockerSettings.isSourceBlocked(this, app, source)
     }
 
     /** Reads visible tab/view IDs and DM markers; never reads or logs message text. */
@@ -309,14 +284,6 @@ class ScrollBlockerService : AccessibilityService() {
     }
 
     override fun onInterrupt() = Unit
-
-    private enum class ScreenContext {
-        HOME_FEED,
-        REELS_TAB,
-        DIRECT_MESSAGES,
-        OTHER,
-        UNKNOWN
-    }
 
     private data class InstagramWindowState(
         val reelsViewerVisible: Boolean,
