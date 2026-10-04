@@ -166,10 +166,11 @@ class MainActivity : AppCompatActivity() {
             )
 
             val selectedCount = listOf(homeBlocked, reelsTabBlocked, messagesBlocked).count { it }
-            sourceSummary.text = getString(
-                R.string.source_selection_summary,
+            sourceSummary.text = resources.getQuantityString(
+                R.plurals.source_selection_summary,
                 selectedCount,
-                ScrollBlockerSettings.Source.values().size
+                selectedCount,
+                ScrollBlockerSettings.Source.entries.size
             )
             val allBlocked = ScrollBlockerSettings.areAllSourcesBlocked(this, app)
             allSourcesButton.isChecked = allBlocked
