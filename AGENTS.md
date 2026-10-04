@@ -8,6 +8,12 @@
 4. Do not publish a release before the PR is merged and its required checks pass. Use a new `vMAJOR.MINOR.PATCH` tag only; do not manually create a GitHub release or bypass `.github/workflows/release.yml`. The tag workflow builds and signs the APK, verifies its signature and checksum, and attaches both files to the GitHub Release. Verify the workflow succeeded and the release assets are present before reporting completion.
 5. Never claim that a release is published if only a tag or a draft/empty release exists. If required signing secrets or permissions are unavailable, report the blocker instead of bypassing the workflow.
 
+## GitHub issue and pull request descriptions
+
+- Write issue and PR titles, bodies, and comments as normal Markdown with actual line breaks. Never submit visible `\\n` escape sequences in place of line breaks.
+- For multi-paragraph bodies, prefer writing the complete text to a temporary file and pass it with `gh issue create --body-file` or `gh pr create --body-file`. If using `--body`, supply a true multiline shell string and quote it safely; do not embed text in a way that lets the shell interpret apostrophes, backticks, dollar signs, or Markdown as shell syntax.
+- After creating or editing an issue or PR, fetch its body back with `gh issue view` or `gh pr view` and confirm headings, paragraphs, lists, and code spans contain real line breaks and render as intended. Correct the body before reporting completion if formatting is wrong.
+
 ## Project-specific development checks
 
 - Use the Gradle wrapper (`./gradlew`).
