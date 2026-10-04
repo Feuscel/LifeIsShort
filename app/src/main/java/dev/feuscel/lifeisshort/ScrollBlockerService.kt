@@ -12,6 +12,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.app.NotificationCompat
 
 /** Blocks Reels only when their selected source is enabled in LifeIsShort. */
 class ScrollBlockerService : AccessibilityService() {
@@ -41,10 +42,11 @@ class ScrollBlockerService : AccessibilityService() {
             getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
         }
 
-        return Notification.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.accessibility_service_description))
             .setSmallIcon(android.R.drawable.ic_menu_view)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .build()
     }
