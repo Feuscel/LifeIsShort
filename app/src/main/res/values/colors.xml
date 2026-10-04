@@ -3,4 +3,5 @@
     <!-- Fallback accent for devices without Material You dynamic colors. -->
     <color name="lifeis_short_primary">#6750A4</color>
     <color name="lifeis_short_secondary">#625B71</color>
+    <color name="launcher_icon_background">#000000</color>
 </resources>
