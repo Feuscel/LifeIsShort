@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         else R.string.source_status_allowed
         val backgroundColor = MaterialColors.getColor(
             statusView,
-            if (blocked) com.google.android.material.R.attr.colorPrimary
+            if (blocked) androidx.appcompat.R.attr.colorPrimary
             else com.google.android.material.R.attr.colorSurface
         )
         val foregroundColor = MaterialColors.getColor(
