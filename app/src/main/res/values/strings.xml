@@ -8,7 +8,6 @@
     <string name="accessibility_permission_button">Open Accessibility settings</string>
     <string name="blocker_description">Choose where Instagram Reels should be blocked. Blocked Reels return to the screen they came from.</string>
     <string name="block_sources_title">Block Reels from</string>
-    <string name="source_selection_summary">%1$d of %2$d sources blocked</string>
     <string name="home_feed_title">Home feed</string>
     <string name="home_feed_description">Reels opened while browsing your feed</string>
     <string name="reels_tab_title">Reels tab</string>
@@ -21,5 +20,10 @@
     <string name="source_status_allowed">Allowed</string>
     <string name="source_switch_accessibility">%1$s: %2$s</string>
     <string name="instagram_app_name">Instagram</string>
+    <string name="instagram_badge_text">IG</string>
     <string name="instagram_blocking_enabled">Reels and feed blocking</string>
+    <plurals name="source_selection_summary">
+        <item quantity="one">%1$d of %2$d source blocked</item>
+        <item quantity="other">%1$d of %2$d sources blocked</item>
+    </plurals>
 </resources>
