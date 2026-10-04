@@ -37,6 +37,27 @@ The service is opt-in: Android requires you to enable it in system Accessibility
 5. Find LifeIsShort in Android's installed accessibility services and enable it. Android will show its standard notice explaining that accessibility services can observe screen content; review and confirm this system prompt to use the blocker.
 6. Return to LifeIsShort, enable Instagram blocking, and select the sources you want to block.
 
+## Download a release APK
+
+Download the latest signed APK and its SHA-256 checksum from the project's [GitHub Releases](https://github.com/Feuscel/LifeIsShort/releases) page. Verify the APK before installing it:
+
+```sh
+sha256sum -c LifeIsShort-1.0.0.apk.sha256
+```
+
+Install the APK on Android. If prompted, allow installation from the app used to open the downloaded APK, then follow the setup steps above to enable the Accessibility Service.
+
+Release APKs are signed with the project's release key. Before publishing the first release, maintainers must create and securely back up a long-lived release keystore, then add these repository Actions secrets under **Settings → Secrets and variables → Actions**:
+
+- `RELEASE_KEYSTORE_BASE64`: the keystore file encoded as base64.
+- `RELEASE_STORE_PASSWORD`: the keystore password.
+- `RELEASE_KEY_ALIAS`: the key alias.
+- `RELEASE_KEY_PASSWORD`: the key password.
+
+For example, create a JKS keystore with `keytool -genkeypair -keystore lifeisshort-release.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias lifeisshort`. Encode the file with `base64 lifeisshort-release.jks > lifeisshort-release.jks.base64`, then securely transfer that file's contents and the passwords into the Actions secrets. Keep secure offline backups of the keystore and credentials; never commit them or put them in an issue, pull request, or build log. Losing the key prevents future APK updates from being installable over existing installs.
+
+Tags must use the `vMAJOR.MINOR.PATCH` format (for example, `v1.0.0`). The release workflow uses its GitHub Actions run number for Android's monotonically increasing version code.
+
 Run the build and static checks with:
 
 ```sh
