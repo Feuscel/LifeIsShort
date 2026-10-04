@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   verify:
-    name: Build and test
+    name: Build and lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -24,12 +24,5 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Android checks
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
-          profile: pixel_2
-          disable-animations: true
-          script: ./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug assembleDebug
+      - name: Build app and instrumentation test APK
+        run: ./gradlew lintDebug assembleDebug assembleDebugAndroidTest

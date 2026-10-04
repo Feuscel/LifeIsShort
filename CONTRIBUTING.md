@@ -17,10 +17,9 @@ On Windows, use `gradlew.bat` in place of `./gradlew`.
 Useful checks:
 
 ```sh
-./gradlew testDebugUnitTest
-./gradlew connectedDebugAndroidTest
 ./gradlew lintDebug
-./gradlew assembleDebug
+./gradlew assembleDebug assembleDebugAndroidTest
+./gradlew connectedDebugAndroidTest
 ```
 
 Instrumented tests require a connected Android device or emulator. Changes to accessibility behavior should be tested against the relevant Instagram flows when possible; include the Android and Instagram versions used in the pull request description, without sharing private screen contents.

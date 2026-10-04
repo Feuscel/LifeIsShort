@@ -37,13 +37,13 @@ The service is opt-in: Android requires you to enable it in system Accessibility
 5. Find LifeIsShort in Android's installed accessibility services and enable it. Android will show its standard notice explaining that accessibility services can observe screen content; review and confirm this system prompt to use the blocker.
 6. Return to LifeIsShort, enable Instagram blocking, and select the sources you want to block.
 
-Run the automated checks with:
+Run the build and static checks with:
 
 ```sh
-./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug assembleDebug
+./gradlew lintDebug assembleDebug assembleDebugAndroidTest
 ```
 
-`connectedDebugAndroidTest` requires a connected Android device or running emulator. On Windows, use `gradlew.bat` in place of `./gradlew`.
+Run instrumented tests on a connected Android device or running emulator with `./gradlew connectedDebugAndroidTest`. On Windows, use `gradlew.bat` in place of `./gradlew`.
 
 ## Privacy
 

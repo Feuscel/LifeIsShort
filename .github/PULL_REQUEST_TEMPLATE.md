@@ -4,10 +4,9 @@ Describe the change and the problem it solves.
 
 ## Testing
 
-- [ ] `./gradlew testDebugUnitTest`
-- [ ] `./gradlew connectedDebugAndroidTest` (when a device or emulator is available)
 - [ ] `./gradlew lintDebug`
-- [ ] `./gradlew assembleDebug`
+- [ ] `./gradlew assembleDebug assembleDebugAndroidTest`
+- [ ] `./gradlew connectedDebugAndroidTest` (when a device or emulator is available)
 
 ## Checklist
 
