@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LifeIsShort</string>
-    <string name="accessibility_service_name">LifeIsShort Reels redirect</string>
-    <string name="accessibility_service_description">Blocks Instagram Reels and returns individual Reels to the screen they were opened from.</string>
+    <string name="accessibility_service_name">LifeIsShort Reels Blocker</string>
+    <string name="accessibility_service_description">Monitors Instagram navigation to detect and block Reels. The service only reads Instagram\'s UI structure to identify Reels viewers and navigation tabs. It never reads message content, personal data, or any other app. No data is collected or transmitted.</string>
     <string name="accessibility_permission_title">Accessibility service</string>
     <string name="accessibility_permission_enabled">Enabled</string>
     <string name="accessibility_permission_disabled">Not enabled</string>
