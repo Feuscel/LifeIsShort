@@ -1,11 +1,18 @@
 package dev.feuscel.lifeisshort
 
 import android.accessibilityservice.AccessibilityService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.app.NotificationCompat
 
 /** Blocks Reels only when their selected source is enabled in LifeIsShort. */
 class ScrollBlockerService : AccessibilityService() {
@@ -16,6 +23,33 @@ class ScrollBlockerService : AccessibilityService() {
     private var lastHomeTabClickAt = 0L
     private var lastSourceDiagnosticAt = 0L
     private var lastSourceDiagnosticContext = ScreenContext.UNKNOWN
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground(NOTIFICATION_ID, createNotification())
+        return Service.START_STICKY
+    }
+
+    private fun createNotification(): Notification {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                getString(R.string.app_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.accessibility_service_description)
+                setShowBadge(false)
+            }
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
+        }
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.accessibility_service_description))
+            .setSmallIcon(android.R.drawable.ic_menu_view)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event ?: return
@@ -305,6 +339,8 @@ class ScrollBlockerService : AccessibilityService() {
         private const val MAX_CLICK_ANCESTORS = 8
         private const val HOME_TAB_RETRY_INTERVAL_MS = 500L
         private const val SOURCE_DIAGNOSTIC_INTERVAL_MS = 1_000L
+        private const val CHANNEL_ID = "lifeisshort_service"
+        private const val NOTIFICATION_ID = 1
         private val DIRECT_TAB_IDS = setOf("direct_tab", "inbox_tab")
         private val DIRECT_MESSAGE_ID_MARKERS = setOf(
             "direct_thread",

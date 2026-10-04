@@ -1,0 +1,54 @@
+name: Pull request policy
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  issues: read
+  pull-requests: read
+
+jobs:
+  policy:
+    name: Validate issue-first PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate title category and pre-existing issue reference
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$PR_TITLE" =~ ^\[(FEATURE|BUGFIX|DOCS|CHORE)\][[:space:]]+.+ ]]; then
+            echo "PR title must start with [FEATURE], [BUGFIX], [DOCS], or [CHORE]." >&2
+            exit 1
+          fi
+
+          issue_number="$(printf '%s' "$PR_BODY" | grep -Eio '(closes|fixes|resolves|refs)[[:space:]]+#([0-9]+)' | grep -Eo '[0-9]+' | head -n 1 || true)"
+          if [[ -z "$issue_number" ]]; then
+            echo "PR body must reference a pre-existing issue using Closes #123 or Refs #123." >&2
+            exit 1
+          fi
+
+          issue_json="$(gh api "repos/${GH_REPO}/issues/${issue_number}")"
+          ISSUE_JSON="$issue_json" PR_CREATED_AT="$PR_CREATED_AT" python3 - <<'PY'
+          import datetime
+          import json
+          import os
+          import sys
+
+          issue = json.loads(os.environ["ISSUE_JSON"])
+          if "pull_request" in issue:
+              sys.exit("The referenced number is a pull request, not an issue.")
+
+          issue_created = datetime.datetime.fromisoformat(issue["created_at"].replace("Z", "+00:00"))
+          pr_created = datetime.datetime.fromisoformat(os.environ["PR_CREATED_AT"].replace("Z", "+00:00"))
+          if issue_created >= pr_created:
+              sys.exit("The referenced issue must be created before the pull request.")
+
+          print(f"Validated issue-first workflow with issue #{issue['number']}.")
+          PY
