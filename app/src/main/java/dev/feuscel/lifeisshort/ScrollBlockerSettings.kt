@@ -47,6 +47,17 @@ object ScrollBlockerSettings {
         }.apply()
     }
 
+    internal fun blockingConfiguration(context: Context, app: TargetApp): BlockingConfiguration {
+        initializeAppPreferences(context, app)
+        val prefs = preferences(context)
+        return BlockingConfiguration(
+            enabled = prefs.getBoolean(appKey(app, "enabled"), false),
+            blockedSources = Source.entries.filterTo(mutableSetOf()) {
+                prefs.getBoolean(sourceKey(app, it), false)
+            }
+        )
+    }
+
     /** Migrate the existing Instagram source choices without changing their behavior. */
     private fun initializeAppPreferences(context: Context, app: TargetApp) {
         if (app != TargetApp.INSTAGRAM) return
@@ -56,30 +67,22 @@ object ScrollBlockerSettings {
         synchronized(this) {
             if (prefs.getBoolean(INSTAGRAM_SETTINGS_INITIALIZED, false)) return
 
-            val oldSourcesInitialized = prefs.getBoolean("source_preferences_initialized", false)
-            val legacyBlockingEnabled = prefs.getBoolean("blocking_enabled", true)
-            val appEnabled = if (oldSourcesInitialized) true else legacyBlockingEnabled
-            val homeFeedBlocked = if (oldSourcesInitialized) {
-                prefs.getBoolean("block_home_feed", false)
-            } else {
-                false
-            }
-            val reelsTabBlocked = if (oldSourcesInitialized) {
-                prefs.getBoolean("block_reels_tab", legacyBlockingEnabled)
-            } else {
-                legacyBlockingEnabled
-            }
-            val messagesBlocked = if (oldSourcesInitialized) {
-                prefs.getBoolean("block_direct_messages", false)
-            } else {
-                false
-            }
+            val migrated = migrateInstagramSettings(prefs.all)
 
             prefs.edit()
-                .putBoolean(appKey(TargetApp.INSTAGRAM, "enabled"), appEnabled)
-                .putBoolean(sourceKey(TargetApp.INSTAGRAM, Source.HOME_FEED), homeFeedBlocked)
-                .putBoolean(sourceKey(TargetApp.INSTAGRAM, Source.REELS_TAB), reelsTabBlocked)
-                .putBoolean(sourceKey(TargetApp.INSTAGRAM, Source.DIRECT_MESSAGES), messagesBlocked)
+                .putBoolean(appKey(TargetApp.INSTAGRAM, "enabled"), migrated.enabled)
+                .putBoolean(
+                    sourceKey(TargetApp.INSTAGRAM, Source.HOME_FEED),
+                    migrated.homeFeedBlocked
+                )
+                .putBoolean(
+                    sourceKey(TargetApp.INSTAGRAM, Source.REELS_TAB),
+                    migrated.reelsTabBlocked
+                )
+                .putBoolean(
+                    sourceKey(TargetApp.INSTAGRAM, Source.DIRECT_MESSAGES),
+                    migrated.directMessagesBlocked
+                )
                 .putBoolean(INSTAGRAM_SETTINGS_INITIALIZED, true)
                 .apply()
         }
@@ -91,4 +94,37 @@ object ScrollBlockerSettings {
 
     private fun preferences(context: Context) =
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+}
+
+internal data class MigratedInstagramSettings(
+    val enabled: Boolean,
+    val homeFeedBlocked: Boolean,
+    val reelsTabBlocked: Boolean,
+    val directMessagesBlocked: Boolean
+)
+
+/** Pure migration mapping so legacy defaults and selections can be tested on the JVM. */
+internal fun migrateInstagramSettings(existing: Map<String, *>): MigratedInstagramSettings {
+    fun boolean(key: String, default: Boolean) = existing[key] as? Boolean ?: default
+
+    val oldSourcesInitialized = boolean("source_preferences_initialized", false)
+    val legacyBlockingEnabled = boolean("blocking_enabled", true)
+    return MigratedInstagramSettings(
+        enabled = if (oldSourcesInitialized) true else legacyBlockingEnabled,
+        homeFeedBlocked = if (oldSourcesInitialized) {
+            boolean("block_home_feed", false)
+        } else {
+            false
+        },
+        reelsTabBlocked = if (oldSourcesInitialized) {
+            boolean("block_reels_tab", legacyBlockingEnabled)
+        } else {
+            legacyBlockingEnabled
+        },
+        directMessagesBlocked = if (oldSourcesInitialized) {
+            boolean("block_direct_messages", false)
+        } else {
+            false
+        }
+    )
 }
