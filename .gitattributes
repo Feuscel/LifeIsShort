@@ -1,0 +1,2 @@
+# Keep Windows batch scripts in CRLF form in working copies.
+*.bat text eol=crlf whitespace=cr-at-eol
